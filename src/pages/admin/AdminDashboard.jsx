@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { userService } from '../../services/userService';
 import { analyticsService } from '../../services/analyticsService';
 import Button from '../../components/ui/Button';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [users, setUsers] = useState([]);
     const [stats, setStats] = useState(null);
@@ -145,6 +147,9 @@ const AdminDashboard = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <Button onClick={() => navigate(`/event/${event._id}`)} className="btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                                View
+                                            </Button>
                                             {event.status === 'PENDING' && (
                                                 <>
                                                     <Button onClick={() => handleStatusChange(event._id, 'APPROVED')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', backgroundColor: '#16a34a', color: 'white' }}>

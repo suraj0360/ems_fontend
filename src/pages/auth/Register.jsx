@@ -5,7 +5,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 const Register = () => {
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user', companyName: '', bio: '' });
     const { register } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
@@ -21,6 +21,11 @@ const Register = () => {
 
         if (!formData.name || !formData.email || !formData.password) {
             setError('All fields are required');
+            return;
+        }
+
+        if (formData.role === 'organizer' && (!formData.companyName || !formData.bio)) {
+            setError('Company Name and Bio are required for Organizers');
             return;
         }
 
@@ -84,6 +89,33 @@ const Register = () => {
                             <option value="organizer">Organizer (Create Events)</option>
                         </select>
                     </div>
+
+                    {formData.role === 'organizer' && (
+                        <>
+                            <Input
+                                label="Company / Organization Name"
+                                id="companyName"
+                                name="companyName"
+                                type="text"
+                                value={formData.companyName}
+                                onChange={handleChange}
+                                required
+                            />
+                            <div className="form-group">
+                                <label htmlFor="bio" className="form-label">Short Bio</label>
+                                <textarea
+                                    id="bio"
+                                    name="bio"
+                                    value={formData.bio}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                    rows="3"
+                                    placeholder="Tell us about your organization..."
+                                    required
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <Button className="btn-primary" type="submit" style={{ marginTop: '0.5rem' }}>
                         Create Account

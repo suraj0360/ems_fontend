@@ -8,6 +8,8 @@ import Register from '../pages/auth/Register';
 import Home from '../pages/common/Home';
 import EventDetails from '../pages/common/EventDetails';
 import NotFound from '../pages/common/NotFound';
+import AboutUs from '../pages/common/AboutUs';
+import ContactUs from '../pages/common/ContactUs';
 
 import UserDashboard from '../pages/user/UserDashboard';
 import BookingPage from '../pages/user/BookingPage';
@@ -28,6 +30,8 @@ const AppRoutes = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/event/:id" element={<EventDetails />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/contact" element={<ContactUs />} />
 
                 {/* User Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['user']} />}>

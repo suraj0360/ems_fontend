@@ -1,9 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const location = useLocation();
+
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
+
+    const getLinkStyle = (path) => {
+        return isActive(path)
+            ? { color: 'var(--primary)', fontWeight: '700', borderBottom: '2px solid var(--primary)' }
+            : { color: 'inherit' };
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -17,11 +27,13 @@ const Navbar = () => {
                     <Link to="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.03em' }} className="text-gradient">
                         EMS
                     </Link>
-                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', fontWeight: 500 }}>
-                        <Link to="/" className="text-hover">Events</Link>
-                        {user && user.role === 'USER' && <Link to="/user/dashboard" className="text-hover">Dashboard</Link>}
-                        {user && user.role === 'ORGANIZER' && <Link to="/organizer/dashboard" className="text-hover">Organizer</Link>}
-                        {user && user.role === 'ADMIN' && <Link to="/admin/dashboard" className="text-hover">Admin</Link>}
+                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', fontWeight: 500, height: '4rem', alignItems: 'center' }}>
+                        <Link to="/" className="text-hover" style={{ ...getLinkStyle('/'), display: 'flex', alignItems: 'center', height: '100%' }}>Events</Link>
+                        <Link to="/about" className="text-hover" style={{ ...getLinkStyle('/about'), display: 'flex', alignItems: 'center', height: '100%' }}>About</Link>
+                        <Link to="/contact" className="text-hover" style={{ ...getLinkStyle('/contact'), display: 'flex', alignItems: 'center', height: '100%' }}>Contact</Link>
+                        {user && user.role === 'USER' && <Link to="/user/dashboard" className="text-hover" style={{ ...getLinkStyle('/user/dashboard'), display: 'flex', alignItems: 'center', height: '100%' }}>Dashboard</Link>}
+                        {user && user.role === 'ORGANIZER' && <Link to="/organizer/dashboard" className="text-hover" style={{ ...getLinkStyle('/organizer/dashboard'), display: 'flex', alignItems: 'center', height: '100%' }}>Organizer</Link>}
+                        {user && user.role === 'ADMIN' && <Link to="/admin/dashboard" className="text-hover" style={{ ...getLinkStyle('/admin/dashboard'), display: 'flex', alignItems: 'center', height: '100%' }}>Admin</Link>}
                     </div>
                 </div>
 

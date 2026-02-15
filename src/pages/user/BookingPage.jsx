@@ -37,8 +37,12 @@ const BookingPage = () => {
     }, [eventId, navigate]);
 
     const handleProceed = () => {
-        if (!selectedTicketType) {
+        if (!selectedTicketType || selectedTicketType.quantity === 0) {
             alert('No tickets available for this event');
+            return;
+        }
+        if (tickets > selectedTicketType.quantity) {
+            alert(`Only ${selectedTicketType.quantity} tickets available.`);
             return;
         }
         navigate('/payment', {
@@ -94,11 +98,22 @@ const BookingPage = () => {
                         type="number"
                         label="Number of Tickets"
                         min="1"
-                        max="10"
+                        max={selectedTicketType ? Math.min(10, selectedTicketType.quantity) : 10}
                         value={tickets}
-                        onChange={(e) => setTickets(parseInt(e.target.value) || 1)}
-                        disabled={!selectedTicketType}
+                        onChange={(e) => {
+                            let val = parseInt(e.target.value) || 0;
+                            // Clamp value between 1 and max allowed
+                            const maxAllowed = selectedTicketType ? Math.min(10, selectedTicketType.quantity) : 10;
+                            if (val > maxAllowed) val = maxAllowed;
+                            setTickets(val);
+                        }}
+                        disabled={!selectedTicketType || selectedTicketType.quantity === 0}
                     />
+                    {selectedTicketType && tickets > selectedTicketType.quantity && (
+                        <p style={{ color: 'var(--role-admin)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                            Max {Math.min(10, selectedTicketType.quantity)} tickets allowed per transaction.
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex-between" style={{
@@ -118,7 +133,7 @@ const BookingPage = () => {
                     onClick={handleProceed}
                     className="btn-primary"
                     style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
-                    disabled={!selectedTicketType}
+                    disabled={!selectedTicketType || selectedTicketType.quantity === 0 || tickets < 1}
                 >
                     Proceed to Payment
                 </Button>

@@ -4,12 +4,14 @@ import { eventService } from '../../services/eventService';
 import { analyticsService } from '../../services/analyticsService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
+import AlertModal from '../../components/ui/AlertModal';
 
 const OrganizerDashboard = () => {
     const { user } = useAuth();
     const [events, setEvents] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
 
     const fetchData = async () => {
         try {
@@ -104,9 +106,23 @@ const OrganizerDashboard = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                                                Edit
-                                            </Link>
+                                            {event.status === 'APPROVED' ? (
+                                                <Button
+                                                    onClick={() => setAlertModal({
+                                                        isOpen: true,
+                                                        title: 'Approved Event',
+                                                        message: 'Please contact the admin to request edits for approved events.'
+                                                    })}
+                                                    className="btn btn-outline"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                                                >
+                                                    Request Edit
+                                                </Button>
+                                            ) : (
+                                                <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                                    Edit
+                                                </Link>
+                                            )}
                                             <Button variant="danger" onClick={() => handleDelete(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                                                 Delete
                                             </Button>
@@ -118,6 +134,12 @@ const OrganizerDashboard = () => {
                     </table>
                 </div>
             )}
+            <AlertModal
+                isOpen={alertModal.isOpen}
+                onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+                title={alertModal.title}
+                message={alertModal.message}
+            />
         </div>
     );
 };
