@@ -270,9 +270,11 @@ ul {
 }
 
 .table th {
-  background: var(--bg-body);
+  background: var(--primary) !important;
+  /* Theme color with !important to force update */
   font-weight: 600;
-  color: var(--text-muted);
+  color: white !important;
+  /* White text with !important */
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -300,7 +302,8 @@ ul {
 
 .badge-success {
   background: #dcfce7;
-  color: #166534;
+  color: #15803d;
+  /* Darker green for better contrast */
 }
 
 .badge-warning {

@@ -4,6 +4,7 @@ import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import SuccessModal from '../../components/ui/SuccessModal';
 
 const PaymentPage = () => {
     const location = useLocation();
@@ -15,6 +16,7 @@ const PaymentPage = () => {
     const [expiry, setExpiry] = useState('');
     const [cvv, setCvv] = useState('');
     const [processing, setProcessing] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     if (!event || !ticketType) {
         return (
@@ -39,8 +41,7 @@ const PaymentPage = () => {
                     ticketTypeId: ticketType._id || ticketType.id,
                     quantity: tickets
                 });
-                alert('Booking Successful!');
-                navigate('/user/dashboard');
+                setShowSuccessModal(true);
             } catch (error) {
                 console.error(error);
                 alert('Booking Failed: ' + (error.response?.data?.message || error.message));
@@ -89,6 +90,12 @@ const PaymentPage = () => {
                     </Button>
                 </form>
             </div>
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => navigate('/user/dashboard')}
+                title="Booking Confirmed!"
+                message={`You have successfully booked ${tickets} ticket(s) for ${event.title}.`}
+            />
         </div>
     );
 };

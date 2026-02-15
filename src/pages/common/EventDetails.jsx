@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
+import { ticketService } from '../../services/ticketService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 
@@ -9,21 +10,26 @@ const EventDetails = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [event, setEvent] = useState(null);
+    const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchEvent = async () => {
+        const fetchData = async () => {
             try {
-                const eventData = await eventService.getEventById(id);
+                const [eventData, ticketsData] = await Promise.all([
+                    eventService.getEventById(id),
+                    ticketService.getTicketsByEventId(id)
+                ]);
                 setEvent(eventData);
+                setTickets(ticketsData);
             } catch (err) {
                 setError('Event not found');
             } finally {
                 setLoading(false);
             }
         };
-        fetchEvent();
+        fetchData();
     }, [id]);
 
     const handleBook = () => {
@@ -32,6 +38,16 @@ const EventDetails = () => {
             return;
         }
         navigate(`/booking/${event._id}`);
+    };
+
+    const handleStatusChange = async (status) => {
+        try {
+            await eventService.updateEvent(event._id, { status });
+            // Refresh event data locally
+            setEvent({ ...event, status });
+        } catch (error) {
+            alert('Update failed');
+        }
     };
 
     if (loading) return <div className="flex-center" style={{ minHeight: '50vh' }}>Loading...</div>;
@@ -108,10 +124,55 @@ const EventDetails = () => {
                             </div>
                         </div>
 
+                        {/* Ticket Info Section */}
+                        <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Tickets Available</p>
+                            {tickets.length > 0 ? (
+                                tickets.map(t => (
+                                    <div key={t._id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                        <span>{t.name}</span>
+                                        <span style={{ fontWeight: 600, color: t.quantity > 0 ? 'var(--text-main)' : 'var(--role-admin)' }}>
+                                            {t.quantity > 0 ? t.quantity : 'Sold Out'}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No ticket info available</p>
+                            )}
+                        </div>
+
                         {(!user || user.role === 'USER') && (
                             <Button onClick={handleBook} className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
                                 Book Tickets
                             </Button>
+                        )}
+
+                        {/* Admin Controls */}
+                        {user && user.role === 'ADMIN' && (
+                            <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Admin Actions</p>
+                                {event.status === 'PENDING' ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <Button
+                                            onClick={() => handleStatusChange('APPROVED')}
+                                            style={{ backgroundColor: '#16a34a', color: 'white', justifyContent: 'center' }}
+                                        >
+                                            Approve
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleStatusChange('REJECTED')}
+                                            style={{ backgroundColor: '#dc2626', color: 'white', justifyContent: 'center' }}
+                                        >
+                                            Reject
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className={`badge ${event.status === 'APPROVED' ? 'badge-success' : 'badge-danger'
+                                        }`} style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>
+                                        Event is {event.status}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
