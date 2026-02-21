@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const EventCard = ({ event }) => {
+    const isExpired = new Date(event.date) < new Date();
+    const isSoldOut = event.totalTickets > 0 && event.soldTickets >= event.totalTickets;
     return (
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ position: 'relative', paddingTop: '56.25%', overflow: 'hidden' }}>
@@ -9,8 +11,18 @@ const EventCard = ({ event }) => {
                     alt={event.title}
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                 />
+                {isExpired && (
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#dc2626', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.85rem', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                        EXPIRED
+                    </div>
+                )}
+                {!isExpired && isSoldOut && (
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#ea580c', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.85rem', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                        SOLD OUT
+                    </div>
+                )}
             </div>
-            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', opacity: isExpired ? 0.6 : 1 }}>
                 <div className="flex-between">
                     <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         {event.category}
@@ -30,7 +42,7 @@ const EventCard = ({ event }) => {
                     <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-main)' }}>
                         {event.price > 0 ? `₹${event.price}` : 'Free'}
                     </span>
-                    <Link to={`/event/${event._id}`} className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>
+                    <Link to={`/event/${event._id}`} className={`btn ${isExpired ? 'btn-ghost' : 'btn-outline'}`} style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>
                         Details
                     </Link>
                 </div>

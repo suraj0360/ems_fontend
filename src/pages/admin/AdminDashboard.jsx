@@ -3,25 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { userService } from '../../services/userService';
 import { analyticsService } from '../../services/analyticsService';
+import { contactService } from '../../services/contactService';
 import Button from '../../components/ui/Button';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [users, setUsers] = useState([]);
+    const [contacts, setContacts] = useState([]);
     const [stats, setStats] = useState(null);
     const [activeTab, setActiveTab] = useState('events');
+    const [respondModalState, setRespondModalState] = useState({ isOpen: false, contactId: null, text: '' });
+    const [viewResponseModalState, setViewResponseModalState] = useState({ isOpen: false, text: '' });
 
     const fetchData = async () => {
         try {
-            const [eventsData, usersData, statsData] = await Promise.all([
+            const [eventsData, usersData, statsData, contactsData] = await Promise.all([
                 eventService.getAllEvents(),
                 userService.getAllUsers(),
-                analyticsService.getDashboardStats()
+                analyticsService.getDashboardStats(),
+                contactService.getAllContacts()
             ]);
             setEvents(eventsData.data); // getAllEvents returns obj with data
             setUsers(usersData);
             setStats(statsData);
+            setContacts(contactsData.data || []);
         } catch (error) {
             console.error("Failed to fetch dashboard data", error);
         }
@@ -75,6 +81,21 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleRespondToContact = (id) => {
+        setRespondModalState({ isOpen: true, contactId: id, text: '' });
+    };
+
+    const submitResponse = async () => {
+        if (!respondModalState.text.trim()) return;
+        try {
+            await contactService.respondToContact(respondModalState.contactId, respondModalState.text);
+            fetchData();
+            setRespondModalState({ isOpen: false, contactId: null, text: '' });
+        } catch (error) {
+            alert('Failed to respond to contact');
+        }
+    };
+
     const getStatusBadge = (status) => {
         switch (status) {
             case 'APPROVED': return 'badge-success';
@@ -116,6 +137,12 @@ const AdminDashboard = () => {
                     onClick={() => setActiveTab('users')}
                 >
                     Manage Users
+                </button>
+                <button
+                    className={`btn ${activeTab === 'contacts' ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setActiveTab('contacts')}
+                >
+                    Contact Forms
                 </button>
             </div>
 
@@ -211,6 +238,102 @@ const AdminDashboard = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {activeTab === 'contacts' && (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Name / Email</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {contacts.map((contact) => (
+                                <tr key={contact._id}>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>{contact.name}</div>
+                                        <div style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{contact.email}</div>
+                                    </td>
+                                    <td>
+                                        <div style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {contact.message}
+                                        </div>
+                                    </td>
+                                    <td>{new Date(contact.createdAt).toLocaleDateString()}</td>
+                                    <td>
+                                        <span className={`badge ${contact.status === 'REPLIED' ? 'badge-success' : 'badge-warning'}`}>
+                                            {contact.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {contact.status === 'PENDING' ? (
+                                            <Button
+                                                variant="primary"
+                                                size="small"
+                                                onClick={() => handleRespondToContact(contact._id)}
+                                            >
+                                                Respond
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                size="small"
+                                                onClick={() => setViewResponseModalState({ isOpen: true, text: contact.response })}
+                                            >
+                                                View Response
+                                            </Button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {respondModalState.isOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
+                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Respond to Contact</h2>
+                        <textarea
+                            className="form-input"
+                            rows="5"
+                            placeholder="Type your response here..."
+                            value={respondModalState.text}
+                            onChange={(e) => setRespondModalState({ ...respondModalState, text: e.target.value })}
+                            style={{ width: '100%', marginBottom: '1.5rem', resize: 'vertical' }}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <Button variant="ghost" onClick={() => setRespondModalState({ isOpen: false, contactId: null, text: '' })}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={submitResponse}>
+                                Send Response
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {viewResponseModalState.isOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
+                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>View Response</h2>
+                        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-default)', borderRadius: '0.5rem', border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
+                            {viewResponseModalState.text}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="primary" onClick={() => setViewResponseModalState({ isOpen: false, text: '' })}>
+                                Close
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
