@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { userService } from '../../services/userService';
+import { authService } from '../../services/authService';
 import { analyticsService } from '../../services/analyticsService';
 import { contactService } from '../../services/contactService';
 import Button from '../../components/ui/Button';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
+import SuccessModal from '../../components/ui/SuccessModal';
+import AlertModal from '../../components/ui/AlertModal';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -13,8 +17,15 @@ const AdminDashboard = () => {
     const [contacts, setContacts] = useState([]);
     const [stats, setStats] = useState(null);
     const [activeTab, setActiveTab] = useState('events');
-    const [respondModalState, setRespondModalState] = useState({ isOpen: false, contactId: null, text: '' });
-    const [viewResponseModalState, setViewResponseModalState] = useState({ isOpen: false, text: '' });
+    const currentUser = authService.getCurrentUser();
+
+    // Modal States
+    const [modalState, setModalState] = useState({
+        type: null, // 'confirm', 'success', 'error'
+        title: '',
+        message: '',
+        action: null // function to execute on confirm
+    });
 
     const fetchData = async () => {
         try {
@@ -42,58 +53,93 @@ const AdminDashboard = () => {
         setEvents(data);
     };
 
+    const closeModal = () => {
+        setModalState(prev => ({ ...prev, type: null }));
+    };
+
+    const showSuccess = (message) => {
+        setModalState({
+            type: 'success',
+            title: 'Success',
+            message,
+            action: null
+        });
+    };
+
+    const showError = (message) => {
+        setModalState({
+            type: 'error',
+            title: 'Error',
+            message,
+            action: null
+        });
+    };
+
+    const handleConfirmAction = async () => {
+        if (modalState.action) {
+            await modalState.action();
+        }
+    };
+
     const handleStatusChange = async (id, status) => {
         try {
             await eventService.updateEvent(id, { status });
             fetchEvents();
+            showSuccess(`Event ${status.toLowerCase()} successfully`);
         } catch (error) {
-            alert('Update failed');
+            showError('Failed to update event status');
         }
     };
 
-    const handleBlockUser = async (id, currentStatus) => {
-        if (!confirm(`Are you sure you want to ${currentStatus ? 'unblock' : 'block'} this user?`)) return;
-        try {
-            await userService.toggleBlockUser(id, !currentStatus);
-            fetchData();
-        } catch (error) {
-            alert('Failed to update user status');
-        }
+    const handleBlockUser = (id, currentStatus) => {
+        setModalState({
+            type: 'confirm',
+            title: currentStatus ? 'Unblock User?' : 'Block User?',
+            message: `Are you sure you want to ${currentStatus ? 'unblock' : 'block'} this user?`,
+            action: async () => {
+                try {
+                    await userService.toggleBlockUser(id, !currentStatus);
+                    fetchData();
+                    showSuccess(`User ${currentStatus ? 'unblocked' : 'blocked'} successfully`);
+                } catch (error) {
+                    showError('Failed to update user status');
+                }
+            }
+        });
     };
 
-    const handleDeleteUser = async (id) => {
-        if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-        try {
-            await userService.deleteUser(id);
-            fetchData();
-        } catch (error) {
-            alert('Failed to delete user');
-        }
+    const handleDeleteUser = (id) => {
+        setModalState({
+            type: 'confirm',
+            title: 'Delete User?',
+            message: 'Are you sure you want to delete this user? This action cannot be undone.',
+            action: async () => {
+                try {
+                    await userService.deleteUser(id);
+                    fetchData();
+                    showSuccess('User deleted successfully');
+                } catch (error) {
+                    showError('Failed to delete user');
+                }
+            }
+        });
     };
 
-    const handleDeleteEvent = async (id) => {
-        if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) return;
-        try {
-            await eventService.deleteEvent(id);
-            fetchData();
-        } catch (error) {
-            alert('Failed to delete event');
-        }
-    };
-
-    const handleRespondToContact = (id) => {
-        setRespondModalState({ isOpen: true, contactId: id, text: '' });
-    };
-
-    const submitResponse = async () => {
-        if (!respondModalState.text.trim()) return;
-        try {
-            await contactService.respondToContact(respondModalState.contactId, respondModalState.text);
-            fetchData();
-            setRespondModalState({ isOpen: false, contactId: null, text: '' });
-        } catch (error) {
-            alert('Failed to respond to contact');
-        }
+    const handleDeleteEvent = (id) => {
+        setModalState({
+            type: 'confirm',
+            title: 'Delete Event?',
+            message: 'Are you sure you want to delete this event? This action cannot be undone.',
+            action: async () => {
+                try {
+                    await eventService.deleteEvent(id);
+                    fetchData();
+                    showSuccess('Event deleted successfully');
+                } catch (error) {
+                    showError('Failed to delete event');
+                }
+            }
+        });
     };
 
     const getStatusBadge = (status) => {
@@ -104,7 +150,7 @@ const AdminDashboard = () => {
         }
     };
 
-    return (
+       return (
         <div>
             <h1 style={{ marginBottom: '2rem', fontSize: '2rem' }}>Admin Dashboard</h1>
 
@@ -147,19 +193,19 @@ const AdminDashboard = () => {
             </div>
 
             {activeTab === 'events' && (
-                <div className="table-container">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Organizer</th>
+            <div className="table-container">
+            <table className="table">
+            <thead>
+            <tr>
+            <th>Title</th>
+            <th>Organizer</th>
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {events.map((event) => (
+                        {events.map((event) => (
                                 <tr key={event._id}>
                                     <td style={{ fontWeight: 500 }}>{event.title}</td>
                                     <td>
@@ -174,22 +220,25 @@ const AdminDashboard = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <Button onClick={() => navigate(`/event/${event._id}`)} className="btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                                                View
+                                        <Button onClick={() => navigate(`/event/${event._id}`)} className="btn-outline" 
+                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                            View
                                             </Button>
                                             {event.status === 'PENDING' && (
                                                 <>
-                                                    <Button onClick={() => handleStatusChange(event._id, 'APPROVED')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', backgroundColor: '#16a34a', color: 'white' }}>
-                                                        Approve
-                                                    </Button>
-                                                    <Button onClick={() => handleStatusChange(event._id, 'REJECTED')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', backgroundColor: '#dc2626', color: 'white' }}>
-                                                        Reject
-                                                    </Button>
+                                            <Button onClick={() => handleStatusChange(event._id, 'APPROVED')} style={{ padding: '0.4rem 0.8rem', 
+                                                fontSize: '0.85rem', backgroundColor: '#16a34a', color: 'white' }}>
+                                                    Approve
+                                                </Button>
+                                                <Button onClick={() => handleStatusChange(event._id, 'REJECTED')} style={{ padding: '0.4rem 0.8rem',
+                                                     fontSize: '0.85rem', backgroundColor: '#dc2626', color: 'white' }}>
+                                                    Reject
+                                                </Button>
                                                 </>
                                             )}
-                                            {event.status !== 'PENDING' && (
-                                                <span className="badge badge-info" style={{ background: 'transparent' }}>
-                                                    Processed
+                                           {event.status !== 'PENDING' && (
+                                            <span className="badge badge-info" style={{ background: 'transparent' }}>
+                                            Processed
                                                 </span>
                                             )}
                                         </div>
@@ -209,19 +258,28 @@ const AdminDashboard = () => {
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((u) => (
-                                <tr key={u.id}>
+                            {Array.isArray(users) && users.map((u) => (
+                                <tr key={u._id || u.id}>
                                     <td style={{ fontWeight: 500 }}>{u.name}</td>
                                     <td>{u.email}</td>
+                                    <td>
+                                        <span className={`badge ${u.role === 'ADMIN' ? 'badge-primary' : 'badge-ghost'}`}>
+                                            {u.role}
+                                        </span>
+                                    </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <Button
                                                 variant={u.isBlocked ? "success" : "warning"}
                                                 size="small"
                                                 onClick={() => handleBlockUser(u._id || u.id, u.isBlocked)}
+                                                disabled={u.role === 'ADMIN'}
+                                                style={u.role === 'ADMIN' ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                                                title={u.role === 'ADMIN' ? "Cannot block an admin" : ""}
                                             >
                                                 {u.isBlocked ? 'Unblock' : 'Block'}
                                             </Button>
@@ -229,113 +287,42 @@ const AdminDashboard = () => {
                                                 variant="danger"
                                                 size="small"
                                                 onClick={() => handleDeleteUser(u._id || u.id)}
+                                                disabled={u.role === 'ADMIN'}
+                                                style={u.role === 'ADMIN' ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                                                title={u.role === 'ADMIN' ? "Cannot delete an admin" : ""}
                                             >
                                                 Delete
                                             </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                              </div>
+                                               </td>
+                                               </tr>
+                                                 ))}
+                                              </tbody>
+                                             </table>
+                                             </div>
+                                             )}
 
-            {activeTab === 'contacts' && (
-                <div className="table-container">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Name / Email</th>
-                                <th>Message</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {contacts.map((contact) => (
-                                <tr key={contact._id}>
-                                    <td>
-                                        <div style={{ fontWeight: 500 }}>{contact.name}</div>
-                                        <div style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{contact.email}</div>
-                                    </td>
-                                    <td>
-                                        <div style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {contact.message}
-                                        </div>
-                                    </td>
-                                    <td>{new Date(contact.createdAt).toLocaleDateString()}</td>
-                                    <td>
-                                        <span className={`badge ${contact.status === 'REPLIED' ? 'badge-success' : 'badge-warning'}`}>
-                                            {contact.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {contact.status === 'PENDING' ? (
-                                            <Button
-                                                variant="primary"
-                                                size="small"
-                                                onClick={() => handleRespondToContact(contact._id)}
-                                            >
-                                                Respond
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="outline"
-                                                size="small"
-                                                onClick={() => setViewResponseModalState({ isOpen: true, text: contact.response })}
-                                            >
-                                                View Response
-                                            </Button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {respondModalState.isOpen && (
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
-                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Respond to Contact</h2>
-                        <textarea
-                            className="form-input"
-                            rows="5"
-                            placeholder="Type your response here..."
-                            value={respondModalState.text}
-                            onChange={(e) => setRespondModalState({ ...respondModalState, text: e.target.value })}
-                            style={{ width: '100%', marginBottom: '1.5rem', resize: 'vertical' }}
-                        />
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <Button variant="ghost" onClick={() => setRespondModalState({ isOpen: false, contactId: null, text: '' })}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={submitResponse}>
-                                Send Response
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {viewResponseModalState.isOpen && (
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
-                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>View Response</h2>
-                        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-default)', borderRadius: '0.5rem', border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
-                            {viewResponseModalState.text}
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant="primary" onClick={() => setViewResponseModalState({ isOpen: false, text: '' })}>
-                                Close
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Modals */}
+            <ConfirmationModal
+                isOpen={modalState.type === 'confirm'}
+                onClose={closeModal}
+                onConfirm={handleConfirmAction}
+                title={modalState.title}
+                message={modalState.message}
+            />
+            <SuccessModal
+                isOpen={modalState.type === 'success'}
+                onClose={closeModal}
+                title={modalState.title}
+                message={modalState.message}
+            />
+            <AlertModal
+                isOpen={modalState.type === 'error'}
+                onClose={closeModal}
+                title={modalState.title}
+                message={modalState.message}
+                type="danger"
+            />
         </div>
     );
 };

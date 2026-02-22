@@ -49,15 +49,18 @@ const UserDashboard = () => {
                 ) : (
                     <div style={{ display: 'grid', gap: '1rem' }}>
                         {bookings.map((booking) => (
-                            <div key={booking._id} className="card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div key={booking._id} className="card" style={{ padding: '1.5rem', display: 'flex',
+                             justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                                 <div>
                                     <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{booking.event.title}</h3>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                                         {new Date(booking.event.date).toLocaleDateString()} &bull; {booking.tickets} Ticket(s)
                                     </p>
                                 </div>
-                                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-                                    <div style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{booking.totalAmount}</div>
+                                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column',
+                                     alignItems: 'flex-end', gap: '0.5rem' }}>
+                                    <div style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{booking.totalAmount}
+                                    </div>
                                     <span className={`badge ${getStatusBadge(booking.status)}`}>
                                         {booking.status}
                                     </span>

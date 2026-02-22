@@ -28,7 +28,7 @@ const Navbar = () => {
                         EMS
                     </Link>
                     <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', fontWeight: 500, height: '4rem', alignItems: 'center' }}>
-                        <Link to="/" className="text-hover" style={{ ...getLinkStyle('/'), display: 'flex', alignItems: 'center', height: '100%' }}>Events</Link>
+
                         <Link to="/about" className="text-hover" style={{ ...getLinkStyle('/about'), display: 'flex', alignItems: 'center', height: '100%' }}>About</Link>
                         <Link to="/contact" className="text-hover" style={{ ...getLinkStyle('/contact'), display: 'flex', alignItems: 'center', height: '100%' }}>Contact</Link>
                         {user && user.role === 'USER' && <Link to="/user/dashboard" className="text-hover" style={{ ...getLinkStyle('/user/dashboard'), display: 'flex', alignItems: 'center', height: '100%' }}>Dashboard</Link>}

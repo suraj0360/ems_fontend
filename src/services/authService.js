@@ -31,7 +31,13 @@ export const authService = {
 
     getCurrentUser: () => {
         const userStr = localStorage.getItem('ems_current_user');
-        return userStr ? JSON.parse(userStr) : null;
+        if (!userStr) return null;
+        try {
+            return JSON.parse(userStr);
+        } catch (e) {
+            console.error("Failed to parse user from local storage", e);
+            return null;
+        }
     },
 
     // Optional: Fetch fresh profile from backend

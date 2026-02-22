@@ -73,12 +73,7 @@ const Login = () => {
                     </p>
                 </form>
 
-                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Demo Credentials:</p>
-                    <p>User: user@example.com / password123</p>
-                    <p>Organizer: organizer@example.com / password123</p>
-                    <p>Admin: admin@example.com / password123</p>
-                </div>
+               
             </div>
         </div>
     );

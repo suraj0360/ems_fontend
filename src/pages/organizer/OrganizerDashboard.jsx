@@ -105,35 +105,36 @@ const OrganizerDashboard = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            {event.status === 'APPROVED' ? (
-                                                <Button
-                                                    onClick={() => setAlertModal({
-                                                        isOpen: true,
-                                                        title: 'Approved Event',
-                                                        message: 'Please contact the admin to request edits for approved events.'
-                                                    })}
-                                                    className="btn btn-outline"
-                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                                                >
-                                                    Request Edit
-                                                </Button>
-                                            ) : (
-                                                <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                                                    Edit
-                                                </Link>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {event.status === 'APPROVED' ? (
+                                    <Button
+                                    onClick={() => setAlertModal({
+                                    isOpen: true,
+                                    title: 'Approved Event',
+                                    message: 'Please contact the admin to request edits for approved events.'
+                                    })}
+                                    className="btn btn-outline"
+                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                                    >
+                                    Request Edit
+                                    </Button>
+                                    ) : (
+                                    <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem',
+                                     fontSize: '0.85rem' }}>
+                                    Edit
+                                    </Link>
                                             )}
-                                            <Button variant="danger" onClick={() => handleDelete(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                                                Delete
+                                    <Button variant="danger" onClick={() => handleDelete(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                         Delete
                                             </Button>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                   ))}
+                                    </tbody>
+                                 </table>
+                                  </div>
+                                  )}
             <AlertModal
                 isOpen={alertModal.isOpen}
                 onClose={() => setAlertModal({ ...alertModal, isOpen: false })}

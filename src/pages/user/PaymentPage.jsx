@@ -55,7 +55,8 @@ const PaymentPage = () => {
             <div className="card" style={{ maxWidth: '500px', width: '100%', padding: '2.5rem' }}>
                 <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Payment Details</h2>
 
-                <div style={{ marginBottom: '2rem', textAlign: 'center', padding: '1rem', background: 'var(--bg-body)', borderRadius: 'var(--radius)' }}>
+                <div style={{ marginBottom: '2rem', textAlign: 'center', padding: '1rem', background: 'var(--bg-body)', 
+                    borderRadius: 'var(--radius)' }}>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Total Amount</p>
                     <strong style={{ fontSize: '2rem', color: 'var(--primary)' }}>₹{totalAmount}</strong>
                 </div>
@@ -85,7 +86,8 @@ const PaymentPage = () => {
                         />
                     </div>
 
-                    <Button type="submit" className="btn-primary" disabled={processing} style={{ marginTop: '1rem', padding: '1rem', fontSize: '1.1rem' }}>
+                    <Button type="submit" className="btn-primary" disabled={processing} style={{ marginTop: '1rem', padding: '1rem',
+                         fontSize: '1.1rem' }}>
                         {processing ? 'Processing Payment...' : `Pay ₹${totalAmount}`}
                     </Button>
                 </form>

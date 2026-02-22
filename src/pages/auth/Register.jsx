@@ -42,7 +42,8 @@ const Register = () => {
             <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2rem' }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.75rem' }}>Create Account</h2>
 
-                {error && <div style={{ background: '#fee2e2', color: '#ef4444', padding: '0.75rem', borderRadius: 'var(--radius)', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
+                 {error && <div style={{ background: '#fee2e2', color: '#ef4444', padding: '0.75rem', borderRadius: 'var(--radius)',
+                     marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <Input
@@ -124,10 +125,10 @@ const Register = () => {
                     <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                         Already have an account? <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>Login</Link>
                     </p>
-                </form>
-            </div>
-        </div>
-    );
-};
+                     </form>
+                     </div>
+                     </div>
+                     );
+                     };
 
-export default Register;
+                    export default Register;
