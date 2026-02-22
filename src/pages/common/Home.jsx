@@ -15,7 +15,14 @@ const Home = () => {
         const fetchEvents = async () => {
             try {
                 const { data } = await eventService.getAllEvents();
-                const approvedEvents = data.filter(e => e.status === 'APPROVED');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const approvedEvents = data.filter(e => {
+                    const eventDate = new Date(e.date);
+                    return e.status === 'APPROVED' && eventDate >= today;
+                });
+
                 setEvents(approvedEvents);
                 setFilteredEvents(approvedEvents);
             } catch (error) {

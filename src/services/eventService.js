@@ -13,14 +13,14 @@ export const eventService = {
     },
 
     createEvent: async (eventData) => {
-        // If image is a File object, we might need FormData
-        // But for now assuming JSON with image URL string or handling upload separately
+        // Axios handles FormData (multipart/form-data) automatically
+        // as well as standard JSON objects.
         const response = await api.post('/events', eventData);
         return response.data;
     },
 
-    updateEvent: async (id, updates) => {
-        const response = await api.patch(`/events/${id}`, updates);
+    updateEvent: async (id, eventData) => {
+        const response = await api.patch(`/events/${id}`, eventData);
         return response.data;
     },
 

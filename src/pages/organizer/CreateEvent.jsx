@@ -20,15 +20,25 @@ const CreateEvent = () => {
         category: 'Social',
         price: 0,
         totalTickets: 0,
-        image: '',
     });
+    const [imageFile, setImageFile] = useState(null);
+    const [existingImage, setExistingImage] = useState('');
+    const [imagePreview, setImagePreview] = useState('');
 
     useEffect(() => {
         if (isEditMode) {
             const fetchEvent = async () => {
                 try {
                     const eventData = await eventService.getEventById(id);
-                    setFormData(eventData);
+                    // Extract existing image if it maps to a URL (or skip if we just use string form)
+                    const { image, ...rest } = eventData;
+                    if (image) setExistingImage(image);
+
+                    // Format date to YYYY-MM-DD for input compatibility if needed
+                    if (rest.date) {
+                        rest.date = new Date(rest.date).toISOString().split('T')[0];
+                    }
+                    setFormData(rest);
                 } catch (error) {
                     alert('Event not found');
                     navigate('/organizer/dashboard');
@@ -43,20 +53,47 @@ const CreateEvent = () => {
         setFormData(prev => ({ ...prev, [id]: value }));
     };
 
+    const handleImageChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    useEffect(() => {
+        // Cleanup object URL to avoid memory leaks
+        return () => {
+            if (imagePreview) URL.revokeObjectURL(imagePreview);
+        };
+    }, [imagePreview]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = {
-                ...formData,
-                organizerId: user._id,
-                price: Number(formData.price),
-                totalTickets: Number(formData.totalTickets)
-            };
+            const submitData = new FormData();
+
+            // Append all textual content
+            Object.keys(formData).forEach(key => {
+                if (formData[key] !== undefined && formData[key] !== null) {
+                    submitData.append(key, formData[key]);
+                }
+            });
+
+            // Re-enforce number conversions correctly
+            submitData.set('price', Number(formData.price));
+            submitData.set('totalTickets', Number(formData.totalTickets));
+            submitData.append('organizerId', user._id);
+
+            // Append image file if present
+            if (imageFile) {
+                submitData.append('image', imageFile);
+            }
 
             if (isEditMode) {
-                await eventService.updateEvent(id, payload);
+                await eventService.updateEvent(id, submitData);
             } else {
-                await eventService.createEvent(payload);
+                await eventService.createEvent(submitData);
             }
             navigate('/organizer/dashboard');
         } catch (error) {
@@ -151,13 +188,38 @@ const CreateEvent = () => {
                         </div>
                     </div>
 
-                    <Input
-                        id="image"
-                        label="Image URL"
-                        placeholder="https://..."
-                        value={formData.image}
-                        onChange={handleChange}
-                    />
+                    <div className="form-group">
+                        <label htmlFor="image" className="form-label">Event Banner Image</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                            {(imagePreview || existingImage) && (
+                                <div style={{
+                                    width: '100%',
+                                    height: '250px',
+                                    borderRadius: '0.5rem',
+                                    overflow: 'hidden',
+                                    border: '1px solid var(--border)',
+                                    backgroundImage: `url(${imagePreview || existingImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundColor: 'var(--bg-default)'
+                                }} />
+                            )}
+                            <input
+                                type="file"
+                                id="image"
+                                accept="image/jpeg, image/png, image/webp"
+                                onChange={handleImageChange}
+                                className="form-input"
+                                style={{ padding: '0.5rem' }}
+                                required={!isEditMode && !existingImage}
+                            />
+                            {imageFile && (
+                                <div style={{ fontSize: '0.85rem', color: 'var(--success)' }}>
+                                    Selected: {imageFile.name}
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
                         <Button type="button" onClick={() => navigate('/organizer/dashboard')} variant="ghost">Cancel</Button>
