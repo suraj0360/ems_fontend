@@ -20,6 +20,7 @@ import OrganizerDashboard from '../pages/organizer/OrganizerDashboard';
 import CreateEvent from '../pages/organizer/CreateEvent';
 
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import Notifications from '../pages/common/Notifications';
 
 const AppRoutes = () => {
     return (
@@ -34,6 +35,10 @@ const AppRoutes = () => {
                 <Route path="/contact" element={<ContactUs />} />
 
                 {/* User Routes */}
+                <Route element={<ProtectedRoute allowedRoles={['user', 'organizer', 'admin']} />}>
+                    <Route path="/notifications" element={<Notifications />} />
+                </Route>
+
                 <Route element={<ProtectedRoute allowedRoles={['user']} />}>
                     <Route path="/user/dashboard" element={<UserDashboard />} />
                     <Route path="/booking/:eventId" element={<BookingPage />} />

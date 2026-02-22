@@ -17,6 +17,8 @@ const AdminDashboard = () => {
     const [contacts, setContacts] = useState([]);
     const [stats, setStats] = useState(null);
     const [activeTab, setActiveTab] = useState('events');
+    const [respondModalState, setRespondModalState] = useState({ isOpen: false, contactId: null, text: '' });
+    const [viewResponseModalState, setViewResponseModalState] = useState({ isOpen: false, text: '' });
     const currentUser = authService.getCurrentUser();
 
     // Modal States
@@ -142,6 +144,22 @@ const AdminDashboard = () => {
         });
     };
 
+    const handleRespondToContact = (id) => {
+        setRespondModalState({ isOpen: true, contactId: id, text: '' });
+    };
+
+    const submitResponse = async () => {
+        if (!respondModalState.text.trim()) return;
+        try {
+            await contactService.respondToContact(respondModalState.contactId, respondModalState.text);
+            fetchData();
+            showSuccess('Response sent successfully');
+            setRespondModalState({ isOpen: false, contactId: null, text: '' });
+        } catch (error) {
+            showError('Failed to respond to contact');
+        }
+    };
+
     const getStatusBadge = (status) => {
         switch (status) {
             case 'APPROVED': return 'badge-success';
@@ -150,7 +168,7 @@ const AdminDashboard = () => {
         }
     };
 
-       return (
+    return (
         <div>
             <h1 style={{ marginBottom: '2rem', fontSize: '2rem' }}>Admin Dashboard</h1>
 
@@ -193,19 +211,19 @@ const AdminDashboard = () => {
             </div>
 
             {activeTab === 'events' && (
-            <div className="table-container">
-            <table className="table">
-            <thead>
-            <tr>
-            <th>Title</th>
-            <th>Organizer</th>
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Organizer</th>
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                        {events.map((event) => (
+                            {events.map((event) => (
                                 <tr key={event._id}>
                                     <td style={{ fontWeight: 500 }}>{event.title}</td>
                                     <td>
@@ -220,25 +238,29 @@ const AdminDashboard = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <Button onClick={() => navigate(`/event/${event._id}`)} className="btn-outline" 
-                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                                            View
+                                            <Button onClick={() => navigate(`/event/${event._id}`)} className="btn-outline"
+                                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                                View
                                             </Button>
                                             {event.status === 'PENDING' && (
                                                 <>
-                                            <Button onClick={() => handleStatusChange(event._id, 'APPROVED')} style={{ padding: '0.4rem 0.8rem', 
-                                                fontSize: '0.85rem', backgroundColor: '#16a34a', color: 'white' }}>
-                                                    Approve
-                                                </Button>
-                                                <Button onClick={() => handleStatusChange(event._id, 'REJECTED')} style={{ padding: '0.4rem 0.8rem',
-                                                     fontSize: '0.85rem', backgroundColor: '#dc2626', color: 'white' }}>
-                                                    Reject
-                                                </Button>
+                                                    <Button onClick={() => handleStatusChange(event._id, 'APPROVED')} style={{
+                                                        padding: '0.4rem 0.8rem',
+                                                        fontSize: '0.85rem', backgroundColor: '#16a34a', color: 'white'
+                                                    }}>
+                                                        Approve
+                                                    </Button>
+                                                    <Button onClick={() => handleStatusChange(event._id, 'REJECTED')} style={{
+                                                        padding: '0.4rem 0.8rem',
+                                                        fontSize: '0.85rem', backgroundColor: '#dc2626', color: 'white'
+                                                    }}>
+                                                        Reject
+                                                    </Button>
                                                 </>
                                             )}
-                                           {event.status !== 'PENDING' && (
-                                            <span className="badge badge-info" style={{ background: 'transparent' }}>
-                                            Processed
+                                            {event.status !== 'PENDING' && (
+                                                <span className="badge badge-info" style={{ background: 'transparent' }}>
+                                                    Processed
                                                 </span>
                                             )}
                                         </div>
@@ -293,14 +315,117 @@ const AdminDashboard = () => {
                                             >
                                                 Delete
                                             </Button>
-                                              </div>
-                                               </td>
-                                               </tr>
-                                                 ))}
-                                              </tbody>
-                                             </table>
-                                             </div>
-                                             )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {activeTab === 'contacts' && (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Name / Email</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Array.isArray(contacts) && contacts.map((contact) => (
+                                <tr key={contact._id}>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>{contact.name}</div>
+                                        <div style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>{contact.email}</div>
+                                    </td>
+                                    <td>
+                                        <div style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={contact.message}>
+                                            {contact.message}
+                                        </div>
+                                    </td>
+                                    <td>{new Date(contact.createdAt || contact.date || new Date()).toLocaleDateString()}</td>
+                                    <td>
+                                        <span className={`badge ${contact.status === 'REPLIED' ? 'badge-success' : 'badge-warning'}`}>
+                                            {contact.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {contact.status === 'PENDING' ? (
+                                            <Button
+                                                variant="primary"
+                                                size="small"
+                                                onClick={() => handleRespondToContact(contact._id)}
+                                            >
+                                                Respond
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                size="small"
+                                                onClick={() => setViewResponseModalState({ isOpen: true, text: contact.response })}
+                                            >
+                                                View Response
+                                            </Button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {(!contacts || contacts.length === 0) && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                                        No contact messages found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {respondModalState.isOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
+                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Respond to Contact</h2>
+                        <textarea
+                            className="form-input"
+                            rows="5"
+                            placeholder="Type your response here..."
+                            value={respondModalState.text}
+                            onChange={(e) => setRespondModalState({ ...respondModalState, text: e.target.value })}
+                            style={{ width: '100%', marginBottom: '1.5rem', resize: 'vertical' }}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <Button variant="ghost" onClick={() => setRespondModalState({ isOpen: false, contactId: null, text: '' })}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={submitResponse}>
+                                Send Response
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {viewResponseModalState.isOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
+                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>View Response</h2>
+                        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-default)', borderRadius: '0.5rem', border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
+                            {viewResponseModalState.text}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="primary" onClick={() => setViewResponseModalState({ isOpen: false, text: '' })}>
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modals */}
             <ConfirmationModal
