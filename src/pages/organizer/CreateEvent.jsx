@@ -4,6 +4,7 @@ import { eventService } from '../../services/eventService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import SuccessModal from '../../components/ui/SuccessModal';
 
 const CreateEvent = () => {
     const { id } = useParams();
@@ -24,6 +25,8 @@ const CreateEvent = () => {
     const [imageFile, setImageFile] = useState(null);
     const [existingImage, setExistingImage] = useState('');
     const [imagePreview, setImagePreview] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
         if (isEditMode) {
@@ -70,6 +73,7 @@ const CreateEvent = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             const submitData = new FormData();
 
@@ -95,9 +99,11 @@ const CreateEvent = () => {
             } else {
                 await eventService.createEvent(submitData);
             }
-            navigate('/organizer/dashboard');
+            setShowSuccess(true);
         } catch (error) {
             alert('Failed to save event');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -222,13 +228,24 @@ const CreateEvent = () => {
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
-                        <Button type="button" onClick={() => navigate('/organizer/dashboard')} variant="ghost">Cancel</Button>
-                        <Button type="submit" className="btn-primary" style={{ paddingLeft: '2rem', paddingRight: '2rem' }}>
-                            {isEditMode ? 'Update Event' : 'Create Event'}
+                        <Button type="button" onClick={() => navigate('/organizer/dashboard')} variant="ghost" disabled={isSubmitting}>Cancel</Button>
+                        <Button type="submit" className="btn-primary" style={{ paddingLeft: '2rem', paddingRight: '2rem' }} disabled={isSubmitting}>
+                            {isSubmitting
+                                ? (isEditMode ? 'Updating...' : 'Creating...')
+                                : (isEditMode ? 'Update Event' : 'Create Event')}
                         </Button>
                     </div>
                 </form>
             </div>
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => {
+                    setShowSuccess(false);
+                    navigate('/organizer/dashboard');
+                }}
+                title="Success!"
+                message={isEditMode ? 'Event has been successfully updated.' : 'Event has been successfully created. The admin will review it shortly.'}
+            />
         </div>
     );
 };
