@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SuccessModal from '../../components/ui/SuccessModal';
@@ -43,7 +44,7 @@ const CreateEvent = () => {
                     }
                     setFormData(rest);
                 } catch (error) {
-                    alert('Event not found');
+                    toast.error('Event not found');
                     navigate('/organizer/dashboard');
                 }
             };
@@ -101,7 +102,7 @@ const CreateEvent = () => {
             }
             setShowSuccess(true);
         } catch (error) {
-            alert('Failed to save event');
+            toast.error(error.response?.data?.message || 'Failed to save event');
         } finally {
             setIsSubmitting(false);
         }
@@ -125,6 +126,7 @@ const CreateEvent = () => {
                             id="date"
                             label="Date"
                             type="date"
+                            min={new Date().toISOString().split('T')[0]}
                             value={formData.date}
                             onChange={handleChange}
                             required

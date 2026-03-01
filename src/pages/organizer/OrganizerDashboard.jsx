@@ -5,6 +5,8 @@ import { analyticsService } from '../../services/analyticsService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import AlertModal from '../../components/ui/AlertModal';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
+import { toast } from 'react-toastify';
 
 const OrganizerDashboard = () => {
     const { user } = useAuth();
@@ -12,6 +14,7 @@ const OrganizerDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState({ isOpen: false, eventId: null });
 
     const fetchData = async () => {
         try {
@@ -32,14 +35,20 @@ const OrganizerDashboard = () => {
         fetchData();
     }, [user]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this event?')) {
-            try {
-                await eventService.deleteEvent(id);
-                fetchData(); // Reload
-            } catch (error) {
-                alert('Failed to delete event');
-            }
+    const handleDeleteClick = (id) => {
+        setConfirmDeleteModal({ isOpen: true, eventId: id });
+    };
+
+    const confirmDelete = async () => {
+        const id = confirmDeleteModal.eventId;
+        setConfirmDeleteModal({ isOpen: false, eventId: null });
+        if (!id) return;
+        try {
+            await eventService.deleteEvent(id);
+            toast.success('Event deleted successfully');
+            fetchData(); // Reload
+        } catch (error) {
+            toast.error('Failed to delete event');
         }
     };
 
@@ -126,7 +135,7 @@ const OrganizerDashboard = () => {
                                                     Edit
                                                 </Link>
                                             )}
-                                            <Button variant="danger" onClick={() => handleDelete(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                            <Button variant="danger" onClick={() => handleDeleteClick(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                                                 Delete
                                             </Button>
                                         </div>
@@ -142,6 +151,13 @@ const OrganizerDashboard = () => {
                 onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
                 title={alertModal.title}
                 message={alertModal.message}
+            />
+            <ConfirmationModal
+                isOpen={confirmDeleteModal.isOpen}
+                onClose={() => setConfirmDeleteModal({ isOpen: false, eventId: null })}
+                onConfirm={confirmDelete}
+                title="Delete Event?"
+                message="Are you sure you want to delete this event? This action cannot be undone."
             />
         </div>
     );

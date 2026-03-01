@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -9,16 +10,19 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setLoading(true);
         try {
             await login(email, password);
+            toast.success('Successfully logged in!');
             navigate('/');
         } catch (error) {
-            setError('Invalid email or password');
+            toast.error(error.response?.data?.message || 'Invalid email or password');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -29,20 +33,6 @@ const Login = () => {
                     <h1 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.75rem' }}>Welcome Back</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Login to access your account</p>
                 </div>
-
-                {error && (
-                    <div style={{
-                        padding: '0.75rem',
-                        backgroundColor: '#fee2e2',
-                        color: '#991b1b',
-                        borderRadius: 'var(--radius)',
-                        marginBottom: '1.5rem',
-                        fontSize: '0.9rem',
-                        textAlign: 'center'
-                    }}>
-                        {error}
-                    </div>
-                )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <Input
@@ -64,8 +54,8 @@ const Login = () => {
                         required
                     />
 
-                    <Button className="btn-primary" type="submit" style={{ marginTop: '0.5rem', width: '100%' }}>
-                        Sign In
+                    <Button className="btn-primary" type="submit" style={{ marginTop: '0.5rem', width: '100%' }} disabled={loading}>
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
 
                     <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -73,7 +63,7 @@ const Login = () => {
                     </p>
                 </form>
 
-               
+
             </div>
         </div>
     );

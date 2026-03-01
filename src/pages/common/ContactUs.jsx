@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
 import { contactService } from '../../services/contactService';
+import { toast } from 'react-toastify';
 
 const ContactUs = () => {
     const [formData, setFormData] = useState({
@@ -11,7 +12,6 @@ const ContactUs = () => {
     const [submitted, setSubmitted] = useState(false);
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,16 +24,17 @@ const ContactUs = () => {
         try {
             await contactService.submitContact(formData);
             setSubmitted(true);
+            toast.success('Message sent! We will get back to you shortly.');
             setFormData({ name: '', email: '', message: '' });
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to submit form');
+            toast.error(err.response?.data?.message || 'Failed to submit form');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="container" style={{ padding: '4rem 1rem', maxWidth: '600px' }}>
+        <div className="container" style={{ padding: '1rem', maxWidth: '600px' }}>
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>Contact Us</h1>
 
             {submitted ? (
@@ -47,11 +48,6 @@ const ContactUs = () => {
                     <p style={{ marginBottom: '2rem', color: 'var(--text-muted)', textAlign: 'center' }}>
                         Have questions or support requests? Fill out the form below.
                     </p>
-                    {error && (
-                        <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '0.5rem', textAlign: 'center' }}>
-                            {error}
-                        </div>
-                    )}
                     <form onSubmit={handleSubmit}>
                         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                             <label htmlFor="name" className="form-label">Name</label>

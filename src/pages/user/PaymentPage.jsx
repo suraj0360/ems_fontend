@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SuccessModal from '../../components/ui/SuccessModal';
@@ -44,7 +45,7 @@ const PaymentPage = () => {
                 setShowSuccessModal(true);
             } catch (error) {
                 console.error(error);
-                alert('Booking Failed: ' + (error.response?.data?.message || error.message));
+                toast.error('Booking Failed: ' + (error.response?.data?.message || error.message));
                 setProcessing(false);
             }
         }, 1500);
@@ -55,8 +56,10 @@ const PaymentPage = () => {
             <div className="card" style={{ maxWidth: '500px', width: '100%', padding: '2.5rem' }}>
                 <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Payment Details</h2>
 
-                <div style={{ marginBottom: '2rem', textAlign: 'center', padding: '1rem', background: 'var(--bg-body)', 
-                    borderRadius: 'var(--radius)' }}>
+                <div style={{
+                    marginBottom: '2rem', textAlign: 'center', padding: '1rem', background: 'var(--bg-body)',
+                    borderRadius: 'var(--radius)'
+                }}>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Total Amount</p>
                     <strong style={{ fontSize: '2rem', color: 'var(--primary)' }}>₹{totalAmount}</strong>
                 </div>
@@ -86,8 +89,10 @@ const PaymentPage = () => {
                         />
                     </div>
 
-                    <Button type="submit" className="btn-primary" disabled={processing} style={{ marginTop: '1rem', padding: '1rem',
-                         fontSize: '1.1rem' }}>
+                    <Button type="submit" className="btn-primary" disabled={processing} style={{
+                        marginTop: '1rem', padding: '1rem',
+                        fontSize: '1.1rem'
+                    }}>
                         {processing ? 'Processing Payment...' : `Pay ₹${totalAmount}`}
                     </Button>
                 </form>

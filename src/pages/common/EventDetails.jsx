@@ -4,6 +4,7 @@ import { eventService } from '../../services/eventService';
 import { ticketService } from '../../services/ticketService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
+import ReviewSection from '../../components/ReviewSection';
 
 const EventDetails = () => {
     const { id } = useParams();
@@ -78,8 +79,10 @@ const EventDetails = () => {
                     padding: '2rem',
                     color: 'white'
                 }}>
-                    <span className="badge badge-info" style={{ marginBottom: '0.5rem', background: 'rgba(255,255,255,0.2)',
-                         color: 'white', backdropFilter: 'blur(4px)' }}>
+                    <span className="badge badge-info" style={{
+                        marginBottom: '0.5rem', background: 'rgba(255,255,255,0.2)',
+                        color: 'white', backdropFilter: 'blur(4px)'
+                    }}>
                         {event.category}
                     </span>
                     <h1 style={{ fontSize: '3rem', color: 'white', marginBottom: '0.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
@@ -95,8 +98,10 @@ const EventDetails = () => {
                     </div>
 
                     <div className="card" style={{ padding: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ width: '3rem', height: '3rem', borderRadius: '50%', background: 'var(--bg-body)',
-                             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                        <div style={{
+                            width: '3rem', height: '3rem', borderRadius: '50%', background: 'var(--bg-body)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem'
+                        }}>
                             👤
                         </div>
                         <div>
@@ -180,6 +185,10 @@ const EventDetails = () => {
                     </div>
                 </div>
             </div>
+            {/* Reviews Section at the bottom */}
+            {new Date(event.date) <= new Date() && (
+                <ReviewSection eventId={event._id} />
+            )}
         </div>
     );
 };
