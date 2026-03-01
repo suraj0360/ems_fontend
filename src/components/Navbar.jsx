@@ -24,7 +24,11 @@ const Navbar = () => {
 
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const notificationRef = useRef(null);
+
+    const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+    const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
     // Fetch Notifications
     const fetchNotifications = async () => {
@@ -88,18 +92,23 @@ const Navbar = () => {
         setShowNotifications(false);
         if (notification.link) {
             navigate(notification.link);
+            closeMobileMenu();
         }
+    };
+
+    const handleMobileLinkClick = () => {
+        closeMobileMenu();
     };
 
     return (
         <nav style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 50 }}>
             <div className="container flex-between" style={{ height: '4rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-                    <Link to="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.03em' }} className="text-gradient">
+                    <Link to="/" onClick={handleMobileLinkClick} style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.03em' }} className="text-gradient">
                         EMS
                     </Link>
-                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', fontWeight: 500, height: '4rem', alignItems: 'center' }}>
-
+                    <div className="desktop-nav">
+                        <Link to="/" className="text-hover" style={{ ...getLinkStyle('/'), display: 'flex', alignItems: 'center', height: '100%' }}>Home</Link>
                         <Link to="/about" className="text-hover" style={{ ...getLinkStyle('/about'), display: 'flex', alignItems: 'center', height: '100%' }}>About</Link>
                         <Link to="/contact" className="text-hover" style={{ ...getLinkStyle('/contact'), display: 'flex', alignItems: 'center', height: '100%' }}>Contact</Link>
                         {user && user.role === 'USER' && <Link to="/user/dashboard" className="text-hover" style={{ ...getLinkStyle('/user/dashboard'), display: 'flex', alignItems: 'center', height: '100%' }}>Dashboard</Link>}
@@ -108,7 +117,7 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div className="desktop-actions">
                     {user ? (
                         <>
                             {/* Notification Bell */}
@@ -207,6 +216,63 @@ const Navbar = () => {
                         <>
                             <Link to="/login" className="btn btn-ghost">Login</Link>
                             <Link to="/register" className="btn btn-primary">Register</Link>
+                        </>
+                    )}
+                </div>
+
+                {/* Mobile Hamburger Button */}
+                <div className="mobile-menu-container">
+                    {user && (
+                        <button
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            style={{
+                                background: 'transparent', border: 'none', cursor: 'pointer',
+                                fontSize: '1.2rem', position: 'relative', display: 'flex', alignItems: 'center',
+                                padding: 0
+                            }}
+                        >
+                            🔔
+                            {unreadCount > 0 && (
+                                <span style={{
+                                    position: 'absolute', top: '-5px', right: '-8px',
+                                    backgroundColor: 'var(--primary)', color: 'white',
+                                    borderRadius: '50%', padding: '0.1rem 0.4rem',
+                                    fontSize: '0.7rem', fontWeight: 'bold'
+                                }}>
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
+                    <button onClick={toggleMobileMenu} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-main)', padding: '0.5rem' }}>
+                        {isMobileMenuOpen ? '✕' : '☰'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu Overlay */}
+            <div className={`mobile-nav-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '1.25rem' }}>
+                    <Link to="/" onClick={handleMobileLinkClick} style={getLinkStyle('/')} className="mobile-nav-link text-hover">Home</Link>
+                    <Link to="/about" onClick={handleMobileLinkClick} style={getLinkStyle('/about')} className="mobile-nav-link text-hover">About</Link>
+                    <Link to="/contact" onClick={handleMobileLinkClick} style={getLinkStyle('/contact')} className="mobile-nav-link text-hover">Contact</Link>
+                    {user && user.role === 'USER' && <Link to="/user/dashboard" onClick={handleMobileLinkClick} style={getLinkStyle('/user/dashboard')} className="mobile-nav-link text-hover">Dashboard</Link>}
+                    {user && user.role === 'ORGANIZER' && <Link to="/organizer/dashboard" onClick={handleMobileLinkClick} style={getLinkStyle('/organizer/dashboard')} className="mobile-nav-link text-hover">Organizer dashboard</Link>}
+                    {user && user.role === 'ADMIN' && <Link to="/admin/dashboard" onClick={handleMobileLinkClick} style={getLinkStyle('/admin/dashboard')} className="mobile-nav-link text-hover">Admin dashboard</Link>}
+                </div>
+
+                <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {user ? (
+                        <>
+                            <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>Hi, {user.name}</span>
+                            <button onClick={handleLogout} className="btn btn-outline" style={{ padding: '0.75rem', fontSize: '1rem', width: '100%' }}>
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" onClick={handleMobileLinkClick} className="btn btn-outline" style={{ padding: '0.75rem', textAlign: 'center' }}>Login</Link>
+                            <Link to="/register" onClick={handleMobileLinkClick} className="btn btn-primary" style={{ padding: '0.75rem', textAlign: 'center' }}>Register</Link>
                         </>
                     )}
                 </div>

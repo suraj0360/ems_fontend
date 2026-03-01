@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { ticketService } from '../../services/ticketService';
+import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
@@ -27,7 +28,7 @@ const BookingPage = () => {
                     setSelectedTicketType(ticketsData[0]);
                 }
             } catch (error) {
-                alert('Event or tickets not found');
+                toast.error('Event or tickets not found');
                 navigate('/');
             } finally {
                 setLoading(false);
@@ -38,11 +39,11 @@ const BookingPage = () => {
 
     const handleProceed = () => {
         if (!selectedTicketType || selectedTicketType.quantity === 0) {
-            alert('No tickets available for this event');
+            toast.error('No tickets available for this event');
             return;
         }
         if (tickets > selectedTicketType.quantity) {
-            alert(`Only ${selectedTicketType.quantity} tickets available.`);
+            toast.error(`Only ${selectedTicketType.quantity} tickets available.`);
             return;
         }
         navigate('/payment', {

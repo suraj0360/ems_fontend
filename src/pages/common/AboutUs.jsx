@@ -2,7 +2,7 @@ import React from 'react';
 
 const AboutUs = () => {
     return (
-        <div className="container" style={{ padding: '4rem 1rem', maxWidth: '800px' }}>
+        <div className="container" style={{ padding: '1rem', maxWidth: '800px' }}>
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>About EMS</h1>
             <div className="card" style={{ padding: '2rem' }}>
                 <p style={{ marginBottom: '1rem', fontSize: '1.1rem', color: 'var(--text-muted)' }}>

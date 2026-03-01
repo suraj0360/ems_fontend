@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { bookingService } from '../../services/bookingService';
 import { eventService } from '../../services/eventService';
 import { useAuth } from '../../hooks/useAuth';
@@ -68,6 +69,11 @@ const UserDashboard = () => {
                                     <span className={`badge ${getStatusBadge(booking.status)}`}>
                                         {booking.status}
                                     </span>
+                                    {booking.status === 'CONFIRMED' && (
+                                        <Link to={`/event/${booking.event._id}`} className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                                            {new Date(booking.event.date) <= new Date() ? 'Review' : 'View'}
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         ))}
