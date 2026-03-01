@@ -39,10 +39,20 @@ const CreateEvent = () => {
                     if (image) setExistingImage(image);
 
                     // Format date to YYYY-MM-DD for input compatibility if needed
-                    if (rest.date) {
-                        rest.date = new Date(rest.date).toISOString().split('T')[0];
+                    let formattedDate = rest.date;
+                    if (formattedDate) {
+                        formattedDate = new Date(formattedDate).toISOString().split('T')[0];
                     }
-                    setFormData(rest);
+                    setFormData({
+                        title: rest.title || '',
+                        description: rest.description || '',
+                        date: formattedDate || '',
+                        time: rest.time || '',
+                        location: rest.location || '',
+                        category: rest.category || 'Social',
+                        price: rest.price || 0,
+                        totalTickets: rest.totalTickets || 0,
+                    });
                 } catch (error) {
                     toast.error('Event not found');
                     navigate('/organizer/dashboard');
