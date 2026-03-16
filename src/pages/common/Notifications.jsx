@@ -3,6 +3,7 @@ import { notificationService } from '../../services/notificationService';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
+import BackButton from '../../components/ui/BackButton';
 
 const Notifications = () => {
     const { user } = useAuth();
@@ -72,6 +73,7 @@ const Notifications = () => {
 
     return (
         <div className="container" style={{ padding: '2rem 0', maxWidth: '800px' }}>
+            <BackButton />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
                 <h1 style={{ fontSize: '2rem', margin: 0 }}>Notifications</h1>
                 {unreadCount > 0 && (

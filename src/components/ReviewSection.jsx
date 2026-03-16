@@ -16,6 +16,8 @@ const ReviewSection = ({ eventId, eventDate }) => {
     const [formError, setFormError] = useState('');
     const [hover, setHover] = useState(0);
 
+    const hasReviewed = reviews.some(r => r.user?._id === user?._id || r.user === user?._id);
+
     useEffect(() => {
         fetchReviews();
     }, [eventId]);
@@ -78,6 +80,10 @@ const ReviewSection = ({ eventId, eventDate }) => {
                 new Date(eventDate) > new Date() ? (
                     <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.5)', borderRadius: 'var(--radius)', textAlign: 'center', marginBottom: '2rem', border: '1px dashed var(--border)' }}>
                         <p style={{ color: 'var(--text-muted)' }}>You will be able to leave a review once the event has concluded.</p>
+                    </div>
+                ) : hasReviewed ? (
+                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: 'var(--radius)', textAlign: 'center', marginBottom: '2rem', border: '1px solid var(--border)' }}>
+                        <p style={{ margin: 0, color: 'var(--text-success)', fontWeight: '500' }}>✓ You have already shared your feedback for this event. Thank you!</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--bg-body)', borderRadius: 'var(--radius)' }}>
