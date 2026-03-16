@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SuccessModal from '../../components/ui/SuccessModal';
+import BackButton from '../../components/ui/BackButton';
 
 const PaymentPage = () => {
     const location = useLocation();
@@ -52,7 +53,10 @@ const PaymentPage = () => {
     };
 
     return (
-        <div className="flex-center" style={{ minHeight: '70vh', paddingBottom: '3rem' }}>
+        <div className="flex-center" style={{ minHeight: '70vh', paddingBottom: '3rem', flexDirection: 'column' }}>
+            <div style={{ maxWidth: '500px', width: '100%' }}>
+                <BackButton />
+            </div>
             <div className="card" style={{ maxWidth: '500px', width: '100%', padding: '2.5rem' }}>
                 <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Payment Details</h2>
 
@@ -94,6 +98,16 @@ const PaymentPage = () => {
                         fontSize: '1.1rem'
                     }}>
                         {processing ? 'Processing Payment...' : `Pay ₹${totalAmount}`}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        className="btn-outline"
+                        onClick={() => navigate(`/event/${event.id || event._id}`)}
+                        disabled={processing}
+                        style={{ marginTop: '0.5rem', width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                    >
+                        Cancel Payment
                     </Button>
                 </form>
             </div>

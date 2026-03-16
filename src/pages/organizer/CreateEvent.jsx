@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SuccessModal from '../../components/ui/SuccessModal';
+import BackButton from '../../components/ui/BackButton';
 
 const CreateEvent = () => {
     const { id } = useParams();
@@ -120,6 +121,7 @@ const CreateEvent = () => {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <BackButton />
             <h1 style={{ marginBottom: '2rem', textAlign: 'center' }}>{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
             <div className="card" style={{ padding: '2.5rem' }}>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>

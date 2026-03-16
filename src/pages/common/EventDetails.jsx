@@ -4,6 +4,7 @@ import { eventService } from '../../services/eventService';
 import { ticketService } from '../../services/ticketService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
+import BackButton from '../../components/ui/BackButton';
 import ReviewSection from '../../components/ReviewSection';
 
 const EventDetails = () => {
@@ -57,6 +58,7 @@ const EventDetails = () => {
 
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <BackButton />
             <div style={{
                 height: '400px',
                 borderRadius: 'var(--radius)',
