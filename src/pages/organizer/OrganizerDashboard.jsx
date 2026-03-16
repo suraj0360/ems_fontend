@@ -4,7 +4,6 @@ import { eventService } from '../../services/eventService';
 import { analyticsService } from '../../services/analyticsService';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
-import AlertModal from '../../components/ui/AlertModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
 
@@ -13,7 +12,6 @@ const OrganizerDashboard = () => {
     const [events, setEvents] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
     const [confirmDeleteModal, setConfirmDeleteModal] = useState({ isOpen: false, eventId: null });
 
     const fetchData = async () => {
@@ -118,38 +116,18 @@ const OrganizerDashboard = () => {
                                             {(() => {
                                                 const isPastDate = new Date(event.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
 
-                                                if (isPastDate) {
+                                                if (!isPastDate && event.status === 'PENDING') {
                                                     return (
-                                                        <span className="badge badge-muted" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', textTransform: 'none' }}>
-                                                            <span>✓</span> Concluded
-                                                        </span>
+                                                        <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{
+                                                            padding: '0.4rem 0.8rem',
+                                                            fontSize: '0.85rem'
+                                                        }}>
+                                                            Edit
+                                                        </Link>
                                                     );
                                                 }
 
-                                                if (event.status === 'APPROVED') {
-                                                    return (
-                                                        <Button
-                                                            onClick={() => setAlertModal({
-                                                                isOpen: true,
-                                                                title: 'Approved Event',
-                                                                message: 'Please contact the admin to request edits for approved events.'
-                                                            })}
-                                                            className="btn btn-outline"
-                                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                                                        >
-                                                            Request Edit
-                                                        </Button>
-                                                    );
-                                                }
-
-                                                return (
-                                                    <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{
-                                                        padding: '0.4rem 0.8rem',
-                                                        fontSize: '0.85rem'
-                                                    }}>
-                                                        Edit
-                                                    </Link>
-                                                );
+                                                return null;
                                             })()}
                                             <Button variant="danger" onClick={() => handleDeleteClick(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                                                 Delete
@@ -162,12 +140,6 @@ const OrganizerDashboard = () => {
                     </table>
                 </div>
             )}
-            <AlertModal
-                isOpen={alertModal.isOpen}
-                onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
-                title={alertModal.title}
-                message={alertModal.message}
-            />
             <ConfirmationModal
                 isOpen={confirmDeleteModal.isOpen}
                 onClose={() => setConfirmDeleteModal({ isOpen: false, eventId: null })}
