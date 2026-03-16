@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Button from '../../components/ui/Button';
-import BackButton from '../../components/ui/BackButton';
 
 const FeedbackPage = () => {
     const [submitted, setSubmitted] = useState(false);
@@ -21,7 +20,6 @@ const FeedbackPage = () => {
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <BackButton />
             <h1>Feedback</h1>
             <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Tell us about your experience.</p>
 

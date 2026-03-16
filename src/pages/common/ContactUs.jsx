@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
 import { contactService } from '../../services/contactService';
 import { toast } from 'react-toastify';
-import BackButton from '../../components/ui/BackButton';
 
 const ContactUs = () => {
     const [formData, setFormData] = useState({
@@ -36,7 +35,6 @@ const ContactUs = () => {
 
     return (
         <div className="container" style={{ padding: '1rem', maxWidth: '600px' }}>
-            <BackButton />
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>Contact Us</h1>
 
             {submitted ? (

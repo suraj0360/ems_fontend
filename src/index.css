@@ -321,6 +321,12 @@ ul {
   color: #0369a1;
 }
 
+.badge-muted {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
 /* Mobile Responsive Navbar */
 .mobile-menu-container {
   display: none;

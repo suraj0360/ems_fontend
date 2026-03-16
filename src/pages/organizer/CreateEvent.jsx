@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SuccessModal from '../../components/ui/SuccessModal';
-import BackButton from '../../components/ui/BackButton';
 
 const CreateEvent = () => {
     const { id } = useParams();
@@ -27,6 +26,7 @@ const CreateEvent = () => {
     const [imageFile, setImageFile] = useState(null);
     const [existingImage, setExistingImage] = useState('');
     const [imagePreview, setImagePreview] = useState('');
+    const [adminNote, setAdminNote] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -36,8 +36,9 @@ const CreateEvent = () => {
                 try {
                     const eventData = await eventService.getEventById(id);
                     // Extract existing image if it maps to a URL (or skip if we just use string form)
-                    const { image, ...rest } = eventData;
+                    const { image, adminNote, ...rest } = eventData;
                     if (image) setExistingImage(image);
+                    if (adminNote) setAdminNote(adminNote);
 
                     // Format date to YYYY-MM-DD for input compatibility if needed
                     let formattedDate = rest.date;
@@ -121,8 +122,22 @@ const CreateEvent = () => {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <BackButton />
             <h1 style={{ marginBottom: '2rem', textAlign: 'center' }}>{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
+
+            {adminNote && (
+                <div style={{
+                    padding: '1.5rem',
+                    backgroundColor: '#fff7ed',
+                    border: '1px solid #ffedd5',
+                    borderRadius: 'var(--radius)',
+                    marginBottom: '2rem',
+                    color: '#9a3412'
+                }}>
+                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>Feedback from Admin:</strong>
+                    <p style={{ margin: 0 }}>{adminNote}</p>
+                </div>
+            )}
+
             <div className="card" style={{ padding: '2.5rem' }}>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                     <Input

@@ -5,7 +5,6 @@ import { ticketService } from '../../services/ticketService';
 import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import BackButton from '../../components/ui/BackButton';
 
 const BookingPage = () => {
     const { eventId } = useParams();
@@ -62,9 +61,6 @@ const BookingPage = () => {
 
     return (
         <div className="flex-center" style={{ minHeight: '60vh', paddingBottom: '3rem', flexDirection: 'column' }}>
-            <div style={{ maxWidth: '600px', width: '100%' }}>
-                <BackButton />
-            </div>
             <div className="card" style={{ maxWidth: '600px', width: '100%', padding: '2.5rem' }}>
                 <h1 style={{ marginBottom: '2rem', fontSize: '1.75rem', textAlign: 'center' }}>Confirm Booking</h1>
 

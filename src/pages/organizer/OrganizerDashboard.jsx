@@ -115,26 +115,42 @@ const OrganizerDashboard = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            {event.status === 'APPROVED' ? (
-                                                <Button
-                                                    onClick={() => setAlertModal({
-                                                        isOpen: true,
-                                                        title: 'Approved Event',
-                                                        message: 'Please contact the admin to request edits for approved events.'
-                                                    })}
-                                                    className="btn btn-outline"
-                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                                                >
-                                                    Request Edit
-                                                </Button>
-                                            ) : (
-                                                <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{
-                                                    padding: '0.4rem 0.8rem',
-                                                    fontSize: '0.85rem'
-                                                }}>
-                                                    Edit
-                                                </Link>
-                                            )}
+                                            {(() => {
+                                                const isPastDate = new Date(event.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
+
+                                                if (isPastDate) {
+                                                    return (
+                                                        <span className="badge badge-muted" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', textTransform: 'none' }}>
+                                                            <span>✓</span> Concluded
+                                                        </span>
+                                                    );
+                                                }
+
+                                                if (event.status === 'APPROVED') {
+                                                    return (
+                                                        <Button
+                                                            onClick={() => setAlertModal({
+                                                                isOpen: true,
+                                                                title: 'Approved Event',
+                                                                message: 'Please contact the admin to request edits for approved events.'
+                                                            })}
+                                                            className="btn btn-outline"
+                                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                                                        >
+                                                            Request Edit
+                                                        </Button>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <Link to={`/organizer/edit-event/${event._id}`} className="btn btn-outline" style={{
+                                                        padding: '0.4rem 0.8rem',
+                                                        fontSize: '0.85rem'
+                                                    }}>
+                                                        Edit
+                                                    </Link>
+                                                );
+                                            })()}
                                             <Button variant="danger" onClick={() => handleDeleteClick(event._id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                                                 Delete
                                             </Button>

@@ -19,6 +19,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('events');
     const [respondModalState, setRespondModalState] = useState({ isOpen: false, contactId: null, text: '' });
     const [viewResponseModalState, setViewResponseModalState] = useState({ isOpen: false, text: '' });
+    const [eventActionModal, setEventActionModal] = useState({ isOpen: false, eventId: null, status: '', note: '' });
     const currentUser = authService.getCurrentUser();
 
     // Modal States
@@ -84,10 +85,16 @@ const AdminDashboard = () => {
     };
 
     const handleStatusChange = async (id, status) => {
+        setEventActionModal({ isOpen: true, eventId: id, status, note: '' });
+    };
+
+    const submitEventStatus = async () => {
+        const { eventId, status, note } = eventActionModal;
         try {
-            await eventService.updateEvent(id, { status });
+            await eventService.updateEvent(eventId, { status, adminNote: note });
             fetchEvents();
             showSuccess(`Event ${status.toLowerCase()} successfully`);
+            setEventActionModal({ isOpen: false, eventId: null, status: '', note: '' });
         } catch (error) {
             showError('Failed to update event status');
         }
@@ -421,6 +428,38 @@ const AdminDashboard = () => {
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                             <Button variant="primary" onClick={() => setViewResponseModalState({ isOpen: false, text: '' })}>
                                 Close
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {eventActionModal.isOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2rem', backgroundColor: 'var(--bg-card)' }}>
+                        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>
+                            {eventActionModal.status === 'APPROVED' ? 'Approve Event' : 'Reject Event'}
+                        </h2>
+                        <textarea
+                            className="form-input"
+                            rows="4"
+                            placeholder="Add a comment or reason (optional)..."
+                            value={eventActionModal.note}
+                            onChange={(e) => setEventActionModal({ ...eventActionModal, note: e.target.value })}
+                            style={{ width: '100%', marginBottom: '1.5rem', resize: 'vertical' }}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <Button variant="ghost" onClick={() => setEventActionModal({ isOpen: false, eventId: null, status: '', note: '' })}>
+                                Cancel
+                            </Button>
+                            <Button
+                                style={{
+                                    backgroundColor: eventActionModal.status === 'APPROVED' ? '#16a34a' : '#dc2626',
+                                    color: 'white'
+                                }}
+                                onClick={submitEventStatus}
+                            >
+                                Confirm {eventActionModal.status === 'APPROVED' ? 'Approval' : 'Rejection'}
                             </Button>
                         </div>
                     </div>
