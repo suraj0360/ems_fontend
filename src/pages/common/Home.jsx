@@ -20,6 +20,7 @@ const Home = () => {
 
                 const approvedEvents = data.filter(e => {
                     const eventDate = new Date(e.date);
+                    eventDate.setHours(0, 0, 0, 0); // Normalized for comparison
                     return e.status === 'APPROVED' && eventDate >= today;
                 });
 

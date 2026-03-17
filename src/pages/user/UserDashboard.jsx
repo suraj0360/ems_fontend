@@ -55,9 +55,17 @@ const UserDashboard = () => {
                                 justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem'
                             }}>
                                 <div>
-                                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{booking.event.title}</h3>
+                                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>
+                                        {booking.event?.title || <span style={{ color: 'var(--danger)', fontStyle: 'italic' }}>Event no longer available</span>}
+                                    </h3>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                        {new Date(booking.event.date).toLocaleDateString()} &bull; {booking.tickets} Ticket(s)
+                                        {booking.event ? (
+                                            <>
+                                                {new Date(booking.event.date).toLocaleDateString()} &bull; {booking.tickets || booking.quantity} Ticket(s)
+                                            </>
+                                        ) : (
+                                            <span>Booking ID: {booking._id}</span>
+                                        )}
                                     </p>
                                 </div>
                                 <div style={{
@@ -69,7 +77,7 @@ const UserDashboard = () => {
                                     <span className={`badge ${getStatusBadge(booking.status)}`}>
                                         {booking.status}
                                     </span>
-                                    {booking.status === 'CONFIRMED' && (
+                                    {booking.status === 'CONFIRMED' && booking.event && (
                                         <Link to={`/event/${booking.event._id}`} className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginTop: '0.5rem' }}>
                                             {new Date(booking.event.date) <= new Date() ? 'Review' : 'View'}
                                         </Link>

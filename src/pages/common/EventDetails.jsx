@@ -150,9 +150,21 @@ const EventDetails = () => {
                         </div>
 
                         {(!user || user.role === 'USER') && (
-                            <Button onClick={handleBook} className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
-                                Book Tickets
-                            </Button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <Button
+                                    onClick={handleBook}
+                                    className="btn-primary"
+                                    style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                                    disabled={new Date(event.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)}
+                                >
+                                    {new Date(event.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) ? 'Event Ended' : 'Book Tickets'}
+                                </Button>
+                                {new Date(event.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) && (
+                                    <p style={{ color: 'var(--danger)', fontSize: '0.85rem', textAlign: 'center' }}>
+                                        Booking is no longer available for this event.
+                                    </p>
+                                )}
+                            </div>
                         )}
 
                         {/* Admin Controls */}
