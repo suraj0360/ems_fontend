@@ -16,8 +16,21 @@ const Home = () => {
             try {
                 // Pass filterPast=true to let backend hide expired events
                 const { data } = await eventService.getAllEvents({ filterPast: 'true' });
-                setEvents(data);
-                setFilteredEvents(data);
+                
+                // Fine-tune filtering on the frontend to remove events that have already started today
+                const upcomingEvents = data.filter(event => {
+                    let eventDate = new Date(event.date);
+                    if (event.time) {
+                        const [hours, minutes] = event.time.split(':').map(Number);
+                        eventDate.setHours(hours || 0, minutes || 0, 0, 0);
+                    } else {
+                        eventDate.setHours(23, 59, 59, 999);
+                    }
+                    return eventDate >= new Date();
+                });
+
+                setEvents(upcomingEvents);
+                setFilteredEvents(upcomingEvents);
             } catch (error) {
                 console.error(error);
             } finally {

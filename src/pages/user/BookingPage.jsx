@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventService } from '../../services/eventService';
 import { ticketService } from '../../services/ticketService';
+import { bookingService } from '../../services/bookingService';
 import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -62,7 +63,8 @@ const BookingPage = () => {
                 });
                 setShowSuccessModal(true);
             } catch (error) {
-                toast.error('Booking failed');
+                console.error(error);
+                toast.error(error.response?.data?.message || 'Booking failed');
             } finally {
                 setIsSubmitting(false);
             }
