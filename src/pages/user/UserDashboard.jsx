@@ -43,7 +43,7 @@ const UserDashboard = () => {
             <section>
                 <h2 style={{ marginBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '1.25rem' }}>My Bookings</h2>
 
-                {bookings.length === 0 ? (
+                {!Array.isArray(bookings) || bookings.length === 0 ? (
                     <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                         <p>You haven't booked any events yet.</p>
                     </div>
@@ -56,12 +56,12 @@ const UserDashboard = () => {
                             }}>
                                 <div>
                                     <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>
-                                        {booking.event?.title || <span style={{ color: 'var(--danger)', fontStyle: 'italic' }}>Event no longer available</span>}
+                                        {booking?.event?.title || <span style={{ color: 'var(--danger)', fontStyle: 'italic' }}>Event no longer available</span>}
                                     </h3>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                        {booking.event ? (
+                                        {booking?.event?.date ? (
                                             <>
-                                                {new Date(booking.event.date).toLocaleDateString()} &bull; {booking.tickets || booking.quantity} Ticket(s)
+                                                {new Date(booking?.event?.date).toLocaleDateString()} &bull; {booking?.tickets || booking?.quantity || 0} Ticket(s)
                                             </>
                                         ) : (
                                             <span>Booking ID: {booking._id}</span>
@@ -72,14 +72,14 @@ const UserDashboard = () => {
                                     textAlign: 'right', display: 'flex', flexDirection: 'column',
                                     alignItems: 'flex-end', gap: '0.5rem'
                                 }}>
-                                    <div style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{booking.totalAmount}
+                                    <div style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{booking?.totalAmount || 0}
                                     </div>
-                                    <span className={`badge ${getStatusBadge(booking.status)}`}>
-                                        {booking.status}
+                                    <span className={`badge ${getStatusBadge(booking?.status)}`}>
+                                        {booking?.status || 'UNKNOWN'}
                                     </span>
-                                    {booking.status === 'CONFIRMED' && booking.event && (
+                                    {booking?.status === 'CONFIRMED' && booking?.event?._id && (
                                         <Link to={`/event/${booking.event._id}`} className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                                            {new Date(booking.event.date) <= new Date() ? 'Review' : 'View'}
+                                            {(booking.event.date && new Date(booking.event.date) <= new Date()) ? 'Review' : 'View'}
                                         </Link>
                                     )}
                                 </div>

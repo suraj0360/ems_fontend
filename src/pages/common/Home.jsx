@@ -14,18 +14,10 @@ const Home = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const { data } = await eventService.getAllEvents();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const approvedEvents = data.filter(e => {
-                    const eventDate = new Date(e.date);
-                    eventDate.setHours(0, 0, 0, 0); // Normalized for comparison
-                    return e.status === 'APPROVED' && eventDate >= today;
-                });
-
-                setEvents(approvedEvents);
-                setFilteredEvents(approvedEvents);
+                // Pass filterPast=true to let backend hide expired events
+                const { data } = await eventService.getAllEvents({ filterPast: 'true' });
+                setEvents(data);
+                setFilteredEvents(data);
             } catch (error) {
                 console.error(error);
             } finally {

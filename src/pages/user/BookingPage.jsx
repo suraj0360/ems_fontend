@@ -5,6 +5,7 @@ import { ticketService } from '../../services/ticketService';
 import { toast } from 'react-toastify';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import SuccessModal from '../../components/ui/SuccessModal';
 
 const BookingPage = () => {
     const { eventId } = useParams();
@@ -14,6 +15,8 @@ const BookingPage = () => {
     const [selectedTicketType, setSelectedTicketType] = useState(null);
     const [tickets, setTickets] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,7 +40,7 @@ const BookingPage = () => {
         fetchData();
     }, [eventId, navigate]);
 
-    const handleProceed = () => {
+    const handleProceed = async () => {
         if (!selectedTicketType || selectedTicketType.quantity === 0) {
             toast.error('No tickets available for this event');
             return;
@@ -46,14 +49,33 @@ const BookingPage = () => {
             toast.error(`Only ${selectedTicketType.quantity} tickets available.`);
             return;
         }
-        navigate('/payment', {
-            state: {
-                event,
-                tickets,
-                ticketType: selectedTicketType,
-                totalAmount: selectedTicketType.price * tickets
+
+        const totalAmount = selectedTicketType.price * tickets;
+
+        if (totalAmount === 0) {
+            setIsSubmitting(true);
+            try {
+                await bookingService.createBooking({
+                    eventId: event._id,
+                    ticketTypeId: selectedTicketType._id,
+                    quantity: tickets
+                });
+                setShowSuccessModal(true);
+            } catch (error) {
+                toast.error('Booking failed');
+            } finally {
+                setIsSubmitting(false);
             }
-        });
+        } else {
+            navigate('/payment', {
+                state: {
+                    event,
+                    tickets,
+                    ticketType: selectedTicketType,
+                    totalAmount
+                }
+            });
+        }
     };
 
     if (loading) return <div className="flex-center" style={{ minHeight: '50vh' }}>Loading...</div>;
@@ -134,11 +156,17 @@ const BookingPage = () => {
                     onClick={handleProceed}
                     className="btn-primary"
                     style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
-                    disabled={!selectedTicketType || selectedTicketType.quantity === 0 || tickets < 1}
+                    disabled={!selectedTicketType || selectedTicketType.quantity === 0 || tickets < 1 || isSubmitting}
                 >
-                    Proceed to Payment
+                    {isSubmitting ? 'Processing...' : (selectedTicketType?.price === 0 ? 'Confirm Free Booking' : 'Proceed to Payment')}
                 </Button>
             </div>
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => navigate('/user/dashboard')}
+                title="Booking Confirmed!"
+                message={`You have successfully booked ${tickets} ticket(s) for ${event.title}.`}
+            />
         </div>
     );
 };
